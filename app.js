@@ -1,10 +1,13 @@
-let inquirer = require('inquirer');
+const inquirer = require('inquirer');
+const orm = require("./config/orm");
+const cTable = require('console.table');
 
 start();
 
 async function start() {
+    console.clear();
 
-    while(true) {
+    while(true){
         const { answer } = await inquirer.prompt({
             type: "list",
             name: "answer",
@@ -21,7 +24,9 @@ async function start() {
         });
 
         if (answer === 'View All Employees'){
-
+            orm.view_all_employees((table) => {
+                console.table(table);
+            });
         } else if (answer === 'View All Employees By Department'){
 
         } else if (answer === 'View All Employees By Manager'){
@@ -35,10 +40,11 @@ async function start() {
         } else if (answer === 'Update Employee Manager'){
 
         } else {
-            break;
-        }
-    }
 
+        }
+
+        console.log('\n');
+    }
 }
 
 // while(true) {

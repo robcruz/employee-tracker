@@ -1,5 +1,5 @@
 // Import MySQL connection.
-var connection = require("connection");
+let connection = require("./connection");
 
 // Helper function for SQL syntax.
 // Let's say we want to pass 3 values into the mySQL query.
@@ -42,7 +42,8 @@ function objToSql(ob) {
 // Object for all our SQL statement functions.
 var orm = {
   all: function(tableInput, cb) {
-    var queryString = "SELECT * FROM " + tableInput + ";";
+    let queryString = "SELECT * FROM " + tableInput + ";";
+    console.log(`queryString: ${queryString}`)
     connection.query(queryString, function(err, result) {
       if (err) {
         throw err;
@@ -50,8 +51,31 @@ var orm = {
       cb(result);
     });
   },
+
+  view_all_employees: (cb) => {
+    let queryString = `
+    SELECT employee.id,
+           employee.first_name, 
+           employee.last_name, 
+           role.title, 
+           department.name,
+           role.salary
+    FROM   employee
+           INNER JOIN role
+           ON employee.role_id = role.id
+           INNER JOIN department
+           ON role.department_id = department.id;
+    `;
+    connection.query(queryString, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      cb(result);
+    });
+  },
+
   create: function(table, cols, vals, cb) {
-    var queryString = "INSERT INTO " + table;
+    let queryString = "INSERT INTO " + table;
 
     queryString += " (";
     queryString += cols.toString();
@@ -70,9 +94,10 @@ var orm = {
       cb(result);
     });
   },
+
   // An example of objColVals would be {name: panther, sleepy: true}
   update: function(table, objColVals, condition, cb) {
-    var queryString = "UPDATE " + table;
+    let queryString = "UPDATE " + table;
 
     queryString += " SET ";
     queryString += objToSql(objColVals);
@@ -88,8 +113,9 @@ var orm = {
       cb(result);
     });
   },
+
   delete: function(table, condition, cb) {
-    var queryString = "DELETE FROM " + table;
+    let queryString = "DELETE FROM " + table;
     queryString += " WHERE ";
     queryString += condition;
 
