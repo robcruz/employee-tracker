@@ -41,7 +41,7 @@ function objToSql(ob) {
 
 // Object for all our SQL statement functions.
 let orm = {
-  all: (cb) => {
+  all: (col, cb) => {
     let queryString = `
     SELECT employee.id,
            employee.first_name, 
@@ -53,7 +53,8 @@ let orm = {
            INNER JOIN role
            ON employee.role_id = role.id
            INNER JOIN department
-           ON role.department_id = department.id;
+           ON role.department_id = department.id
+    ORDER BY ${col};
     `;
     connection.query(queryString, (err, result) => {
       if (err) {

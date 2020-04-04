@@ -25,16 +25,22 @@ async function fetchQuestionnaire(cb) {
 
 async function start() {
     await fetchQuestionnaire((answer) => {
+        console.log('\n');
         switch (answer) {
             case "View All Employees":
-                orm.all((table) => {
-                    console.log('\n');
+                orm.all('id', table => {
                     console.table(table);
                     start();
                 });
+                break;
             case "View All Employees By Department":
-                start();
-
+                orm.all('id', table => {
+                    console.table(table);
+                    start();
+                });
+                break;
+            default:
+                break;
         }
     })
 }
