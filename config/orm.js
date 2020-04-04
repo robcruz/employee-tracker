@@ -40,19 +40,8 @@ function objToSql(ob) {
 }
 
 // Object for all our SQL statement functions.
-var orm = {
-  all: function(tableInput, cb) {
-    let queryString = "SELECT * FROM " + tableInput + ";";
-    console.log(`queryString: ${queryString}`)
-    connection.query(queryString, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      cb(result);
-    });
-  },
-
-  view_all_employees: (cb) => {
+let orm = {
+  all: (cb) => {
     let queryString = `
     SELECT employee.id,
            employee.first_name, 
@@ -129,5 +118,4 @@ var orm = {
   }
 };
 
-// Export the orm object for the model (cat.js).
 module.exports = orm;

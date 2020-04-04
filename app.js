@@ -2,50 +2,76 @@ const inquirer = require('inquirer');
 const orm = require("./config/orm");
 const cTable = require('console.table');
 
+console.clear();
 start();
 
+async function fetchQuestionnaire(cb) {
+    const { answer } = await inquirer.prompt({
+        type: "list",
+        name: "answer",
+        message: "What would you like to do?",
+        choices: [
+            "View All Employees",
+            "View All Employees By Department",
+            "View All Employees By Manager",
+            "Add Employee",
+            "Remove Employee",
+            "Update Employee Role",
+            "Update Employee Manager"
+        ]
+    });
+    cb(answer);
+}
+
 async function start() {
-    console.clear();
-
-    while(true){
-        const { answer } = await inquirer.prompt({
-            type: "list",
-            name: "answer",
-            message: "What would you like to do?",
-            choices: [
-                "View All Employees",
-                "View All Employees By Department",
-                "View All Employees By Manager",
-                "Add Employee",
-                "Remove Employee",
-                "Update Employee Role",
-                "Update Employee Manager"
-            ]
-        });
-
-        if (answer === 'View All Employees'){
-            orm.view_all_employees((table) => {
-                console.table(table);
-            });
-        } else if (answer === 'View All Employees By Department'){
-
-        } else if (answer === 'View All Employees By Manager'){
-
-        } else if (answer === 'Add Employee'){
-
-        } else if (answer === 'Remove Employee'){
-
-        } else if (answer === 'Update Employee Role'){
-
-        } else if (answer === 'Update Employee Manager'){
-
-        } else {
+    await fetchQuestionnaire((answer) => {
+        switch (answer) {
+            case "View All Employees":
+                orm.all((table) => {
+                    console.log('\n');
+                    console.table(table);
+                    start();
+                });
+            case "View All Employees By Department":
+                start();
 
         }
-
-        console.log('\n');
-    }
+    })
 }
+
+// async function start() {
+//     console.clear();
+//
+//     console.log('\n');
+//
+//     while(true){
+//         console.log('\n');
+//
+//         if (answer === 'View All Employees'){
+//             orm.view_all_employees((table) => {
+//                 console.log('\n');
+//                 console.table(table);
+//                 console.log('\n');
+//             });
+//         } else if (answer === 'View All Employees By Department'){
+//
+//         } else if (answer === 'View All Employees By Manager'){
+//
+//         } else if (answer === 'Add Employee'){
+//
+//         } else if (answer === 'Remove Employee'){
+//
+//         } else if (answer === 'Update Employee Role'){
+//
+//         } else if (answer === 'Update Employee Manager'){
+//
+//         } else {
+//             console.log('\n');
+//         }
+//
+//         console.log('\n');
+//     }
+// }
 
 // while(true) {
 //     let employee = await inquirer.prompt({
