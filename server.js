@@ -3,6 +3,7 @@ const orm = require("./config/orm");
 const cTable = require('console.table');
 
 console.clear();
+
 start();
 
 async function fetchQuestionnaire(cb) {
@@ -23,6 +24,49 @@ async function fetchQuestionnaire(cb) {
     cb(answer);
 }
 
+async function fetchEmployeeName(cb) {
+    const { firstName, lastName } = await inquirer.prompt([
+        {
+            type: "input",
+            message: "What is the employee's first name?",
+            name: "firstName"
+        },
+        {
+            type: "input",
+            message: "What is the employee's last name?",
+            name: "lastName"
+        }
+    ]);
+    cb(firstName, lastName );
+}
+
+async function fetchEmployeeRole(roles, cb) {
+    console.log('--- roles');
+    console.log(roles);
+    let roleArr = [];
+    let roleObj = {};
+    for (let result of roles) {
+        roleArr.push(result.title);
+        roleObj[result.title] = result.id
+    }
+    console.log('--- roleArr');
+    console.log(roleArr);
+    console.log('--- roleObj');
+    console.log(roleObj);
+    console.log('--- ');
+    const { role } = await inquirer.prompt({
+        type: "list",
+        name: "role",
+        message: "What is the employee's role?",
+        choices: roleArr
+    });
+
+    console.log('--- ');
+    console.log(roleObj[role]);
+    console.log('--- ');
+    cb(roleObj[role]);
+}
+
 async function start() {
     await fetchQuestionnaire((answer) => {
         console.log('\n');
@@ -39,11 +83,38 @@ async function start() {
                     start();
                 });
                 break;
-            case "Add Employee":
-                orm.all('name', table => {
+            case "View All Employees By Manager":
+                orm.all('manager', table => {
                     console.table(table);
                     start();
                 });
+                break;
+            case "Add Employee":
+                fetchEmployeeName((firstName, lastName ) => {
+                    console.log(`${firstName} ${lastName}`);
+                    orm.roles((roles) => {
+                        fetchEmployeeRole(roles, (role) => {
+                            console.log(role)
+                        });
+
+                    });
+
+
+
+
+                    // Role
+
+                    // Manager
+
+                    start()
+                });
+
+                //
+                // orm.create('name', table => {
+                //     console.table(table);
+                //     start();
+                // });
+
                 break;
 
             // case "View All Employees By Manager":

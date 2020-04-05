@@ -3,6 +3,7 @@ let connection = require("./connection");
 
 // Object for all our SQL statement functions.
 let orm = {
+
   all: (col, cb) => {
     let queryString = `
     SELECT e.id,
@@ -17,10 +18,20 @@ let orm = {
            ON e.role_id = r.id
            INNER JOIN department d
            ON r.department_id = d.id
-           INNER JOIN manager m
+           LEFT JOIN manager m
            ON e.manager_id = m.id
     ORDER BY ${col};
     `;
+    connection.query(queryString, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      cb(result);
+    });
+  },
+
+  roles: (cb) => {
+    let queryString = "select id, title from role;";
     connection.query(queryString, (err, result) => {
       if (err) {
         throw err;
