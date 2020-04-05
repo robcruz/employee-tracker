@@ -34,11 +34,25 @@ async function start() {
                 });
                 break;
             case "View All Employees By Department":
-                orm.all('id', table => {
+                orm.all('name', table => {
                     console.table(table);
                     start();
                 });
                 break;
+            case "Add Employee":
+                orm.all('name', table => {
+                    console.table(table);
+                    start();
+                });
+                break;
+
+            // case "View All Employees By Manager":
+            //     orm.all('id', table => {
+            //         console.table(table);
+            //         start();
+            //     });
+            //     break;
+
             default:
                 break;
         }

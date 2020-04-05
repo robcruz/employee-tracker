@@ -20,6 +20,16 @@ CREATE TABLE role
 	FOREIGN KEY (department_id) REFERENCES department(id)
 );
 
+CREATE TABLE manager
+(
+	id int NOT NULL AUTO_INCREMENT,
+	first_name VARCHAR(30) NOT NULL,
+	last_name VARCHAR(30) NOT NULL,
+	role_id int NOT NULL,
+	FOREIGN KEY (role_id) REFERENCES role(id),
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE employee (
 	id int NOT NULL AUTO_INCREMENT,
 	first_name VARCHAR(30) NOT NULL,
