@@ -3,7 +3,7 @@ const orm = require("./config/orm");
 const cTable = require('console.table');
 
 console.clear();
-
+console.log('');
 start();
 
 async function fetchQuestionnaire(cb) {
@@ -100,19 +100,19 @@ async function start() {
     await fetchQuestionnaire((answer) => {
         switch (answer) {
             case "View All Employees":
-                orm.all('id', table => {
+                orm.employees('id', table => {
                     console.table(table);
                     start();
                 });
                 break;
             case "View All Employees By Department":
-                orm.all('name', table => {
+                orm.employees('name', table => {
                     console.table(table);
                     start();
                 });
                 break;
             case "View All Employees By Manager":
-                orm.all('manager', table => {
+                orm.employees('manager', table => {
                     console.table(table);
                     start();
                 });
@@ -123,7 +123,7 @@ async function start() {
                         fetchEmployeeRoleId(results, roleId => {
                             orm.managers(results => {
                                 fetchEmployeeManagerId(results, managerId => {
-                                    orm.create(firstName, lastName, roleId, managerId, (results) => {
+                                    orm.insert_employee(firstName, lastName, roleId, managerId, (results) => {
                                         // console.log(`firstName: ${firstName}\nlastName: ${lastName}\nroleId: ${roleId}\nmanagerId: ${managerId}`);
                                         start();
                                     })
@@ -134,20 +134,36 @@ async function start() {
                 });
                 break;
             case "Remove Employee":
-                orm.all('id', results => {
+                orm.employees('id', results => {
                     fetchEmployeeId(results, id => {
-                        orm.delete(id, results => {
+                        orm.delete_employee(id, results => {
                             start();
                         })
                     })
                 });
                 break;
             case "Update Employee Role":
-                orm.all('id', results => {
+                orm.employees('id', results => {
                     fetchEmployeeId(results, employeeId => {
-                        fetchEmployeeRoleId(results, roleId => {
-                            orm.update(roleId, employeeId, (result) => {
-                                start()
+                        orm.all('role', roles => {
+                            fetchEmployeeRoleId(roles, roleId => {
+                                orm.update_employee_role(roleId, employeeId, (result) => {
+                                    start()
+                                })
+                            })
+                        })
+                    })
+                });
+                break;
+            case "Update Employee Manager":
+                orm.employees('id', results => {
+                    fetchEmployeeId(results, employeeId => {
+                        orm.all('manager', managers => {
+                            fetchEmployeeManagerId(managers, managerId => {
+                                orm.update_employee_manager(managerId, employeeId, results => {
+                                    console.log(results);
+                                    start()
+                                })
                             })
                         })
                     })
