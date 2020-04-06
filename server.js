@@ -40,36 +40,64 @@ async function fetchEmployeeName(cb) {
     cb(firstName, lastName );
 }
 
-async function fetchEmployeeRole(roles, cb) {
-    console.log('--- roles');
-    console.log(roles);
-    let roleArr = [];
-    let roleObj = {};
-    for (let result of roles) {
-        roleArr.push(result.title);
-        roleObj[result.title] = result.id
+async function fetchEmployeeRoleId(results, cb) {
+    let choices = [];
+    let idLookup = {};
+    for (let result of results) {
+        choices.push(result.title);
+        idLookup[result.title] = result.id
     }
-    console.log('--- roleArr');
-    console.log(roleArr);
-    console.log('--- roleObj');
-    console.log(roleObj);
-    console.log('--- ');
+
+    let question = "What is the employee's role?";
     const { role } = await inquirer.prompt({
         type: "list",
         name: "role",
-        message: "What is the employee's role?",
-        choices: roleArr
+        message: question,
+        choices: choices
     });
+    cb(idLookup[role]);
+}
 
-    console.log('--- ');
-    console.log(roleObj[role]);
-    console.log('--- ');
-    cb(roleObj[role]);
+async function fetchEmployeeManagerId(results, cb) {
+    let choices = [];
+    let idLookup = {};
+    for (let result of results) {
+        const name = `${result.first_name} ${result.last_name}`;
+        choices.push(name);
+        idLookup[name] = result.id
+    }
+
+    let question = "Who is the employee's manager?";
+    const { name } = await inquirer.prompt({
+        type: "list",
+        name: "name",
+        message: question,
+        choices: choices
+    });
+    cb(idLookup[name]);
+}
+
+async function fetchEmployeeId(results, cb) {
+    let choices = [];
+    let idLookup = {};
+    for (let result of results) {
+        const name = `${result.first_name} ${result.last_name}`;
+        choices.push(name);
+        idLookup[name] = result.id
+    }
+
+    let question = "Which employee would you like to remove?";
+    const { name } = await inquirer.prompt({
+        type: "list",
+        name: "name",
+        message: question,
+        choices: choices
+    });
+    cb(idLookup[name]);
 }
 
 async function start() {
     await fetchQuestionnaire((answer) => {
-        console.log('\n');
         switch (answer) {
             case "View All Employees":
                 orm.all('id', table => {
@@ -91,153 +119,42 @@ async function start() {
                 break;
             case "Add Employee":
                 fetchEmployeeName((firstName, lastName ) => {
-                    console.log(`${firstName} ${lastName}`);
-                    orm.roles((roles) => {
-                        fetchEmployeeRole(roles, (role) => {
-                            console.log(role)
+                    orm.roles(results => {
+                        fetchEmployeeRoleId(results, roleId => {
+                            orm.managers(results => {
+                                fetchEmployeeManagerId(results, managerId => {
+                                    orm.create(firstName, lastName, roleId, managerId, (results) => {
+                                        // console.log(`firstName: ${firstName}\nlastName: ${lastName}\nroleId: ${roleId}\nmanagerId: ${managerId}`);
+                                        start();
+                                    })
+                                })
+                            })
                         });
-
                     });
-
-
-
-
-                    // Role
-
-                    // Manager
-
-                    start()
                 });
-
-                //
-                // orm.create('name', table => {
-                //     console.table(table);
-                //     start();
-                // });
-
                 break;
-
-            // case "View All Employees By Manager":
-            //     orm.all('id', table => {
-            //         console.table(table);
-            //         start();
-            //     });
-            //     break;
-
+            case "Remove Employee":
+                orm.all('id', results => {
+                    fetchEmployeeId(results, id => {
+                        orm.delete(id, results => {
+                            start();
+                        })
+                    })
+                });
+                break;
+            case "Update Employee Role":
+                orm.all('id', results => {
+                    fetchEmployeeId(results, employeeId => {
+                        fetchEmployeeRoleId(results, roleId => {
+                            orm.update(roleId, employeeId, (result) => {
+                                start()
+                            })
+                        })
+                    })
+                });
+                break;
             default:
                 break;
         }
     })
 }
-
-// async function start() {
-//     console.clear();
-//
-//     console.log('\n');
-//
-//     while(true){
-//         console.log('\n');
-//
-//         if (answer === 'View All Employees'){
-//             orm.view_all_employees((table) => {
-//                 console.log('\n');
-//                 console.table(table);
-//                 console.log('\n');
-//             });
-//         } else if (answer === 'View All Employees By Department'){
-//
-//         } else if (answer === 'View All Employees By Manager'){
-//
-//         } else if (answer === 'Add Employee'){
-//
-//         } else if (answer === 'Remove Employee'){
-//
-//         } else if (answer === 'Update Employee Role'){
-//
-//         } else if (answer === 'Update Employee Manager'){
-//
-//         } else {
-//             console.log('\n');
-//         }
-//
-//         console.log('\n');
-//     }
-// }
-
-// while(true) {
-//     let employee = await inquirer.prompt({
-//         type: "checkbox",
-//         message: "Choose employee role you want to enter next:",
-//         name: "role",
-//         choices: [
-//             "Engineer",
-//             "Intern",
-//             "Done"
-//         ]
-//     });
-//
-//     let role = employee.role.shift();
-//
-//     if (role === 'Engineer') {
-//         let engineerPrompt = await inquirer.prompt([
-//             {
-//                 message: "Enter engineer's name:",
-//                 name: "name"
-//             },
-//             {
-//                 message: "Enter engineer's email:",
-//                 name: "email"
-//             },
-//             {
-//                 message: "Enter engineer's Github account:",
-//                 name: "github"
-//             }
-//         ]);
-//
-//         let engineer = new Engineer();
-//         engineer.name = engineerPrompt.name;
-//         engineer.email = engineerPrompt.email;
-//         engineer.github = engineerPrompt.github;
-//         engineer.id = interns.length + managers.length + engineers.length + 1;
-//
-//         engineers.push(engineer);
-//
-//     } else if (role === 'Intern') {
-//         let internPrompt = await inquirer.prompt([
-//             {
-//                 message: "Enter intern's name:",
-//                 name: "name"
-//             },
-//             {
-//                 message: "Enter intern's email:",
-//                 name: "email"
-//             },
-//             {
-//                 message: "Enter intern's School:",
-//                 name: "school"
-//             }
-//         ]);
-//
-//         let intern = new Intern();
-//         intern.name = internPrompt.name;
-//         intern.email = internPrompt.email;
-//         intern.school = internPrompt.school;
-//         intern.id = interns.length + managers.length + engineers.length + 1;
-//
-//         interns.push(intern);
-//
-//     } else {
-//         let managerHtml = generateManagerHtml(managers.shift());
-//         let engineerHtml = '';
-//         for (let engineer of engineers) engineerHtml += generateEngineerHtml(engineer);
-//         let internHtml = '';
-//         for (let intern of interns) internHtml += generateInternHtml(intern);
-//         let engineerSeparator = "";
-//         if (engineers.length > 0) engineerSeparator = "<hr>";
-//         let internSeparator = "";
-//         if (interns.length > 0) internSeparator = "<hr>";
-//         let htmlOutput = generateHTML(managerHtml, engineerSeparator, engineerHtml, internSeparator, internHtml);
-//         writeHtmlOutput(htmlOutput);
-//         break;
-//     }
-// }
